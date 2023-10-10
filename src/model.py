@@ -21,21 +21,7 @@ class MyModel(nn.Module):
         
         # note: input = 224x224 pixels, RGB
 
-        self.model_ = nn.Sequential(
-            # nn.Conv2d(3,10, kernel_size, padding=1),
-            # nn.Conv2d(3,10, kernel_size, padding=1),
-            # nn.MaxPool2d(kernel_size=2, stride=2),
-
-            # nn.Conv2d(3,10, kernel_size, padding=1),
-            # nn.Conv2d(3,10, kernel_size, padding=1),
-            # nn.MaxPool2d(kernel_size=2, stride=2),
-
-            # nn.Flatten(),
-
-            # # TODO: continue
-
-
-
+        self.model_1 = nn.Sequential(
 
             # another architecture (VGG11)
             nn.Conv2d(in_channels, 64, kernel_size=3, padding=1),
@@ -77,7 +63,7 @@ class MyModel(nn.Module):
             nn.Linear(in_features=4096, out_features=num_classes)
         )
         
-        self.model = nn.Sequential(
+        self.model_2 = nn.Sequential(
             
             # =================  Backbone ==================#
 
@@ -148,6 +134,103 @@ class MyModel(nn.Module):
             nn.ReLU(),
             
             nn.Linear(256, num_classes),
+        )
+        
+        # input image: 224x224
+        self.model_3 = nn.Sequential(
+            nn.Conv2d(3, 32, (3,5), padding=(1, 2)),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            
+            nn.Conv2d(32, 64, (3,5), padding=(1,2)),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            
+            nn.MaxPool2d(2, 2), # output size: 112x112
+            
+            nn.Conv2d(64, 128, (3,7), padding=(1,3)),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            
+            nn.MaxPool2d(2, 2), # output size: 56x56
+            
+            nn.Conv2d(128, 256, 3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            
+            nn.MaxPool2d(2, 2), # output size: 28x28
+            
+            nn.Conv2d(256, 512, 3, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            
+            nn.MaxPool2d(2, 2), # output size: 14x14
+            
+            nn.Conv2d(512, 1024, 3, padding=1),
+            nn.BatchNorm2d(1024),
+            nn.ReLU(),
+            
+            nn.Flatten(),
+            
+            nn.Linear(1024 * 14 * 14, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            
+            nn.Linear(1024, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            
+            nn.Linear(1024, num_classes),
+            
+        )
+        
+        # input image: 224x224
+        self.model = nn.Sequential(
+        
+            nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2), # output size: 112x112
+            
+            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2), # output size: 56x56
+            nn.BatchNorm2d(32),
+            
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
+            
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),  # output size: 28x28
+            nn.BatchNorm2d(64),
+            
+            
+            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
+            nn.LeakyReLU(negative_slope=0.2), #nn.ReLU(), # 
+            nn.MaxPool2d(2, 2), # output size: 14x14
+            nn.BatchNorm2d(128),
+            
+            
+            nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, padding=1),
+            nn.LeakyReLU(negative_slope=0.2), # nn.ReLU(), # 
+            nn.MaxPool2d(2, 2), # output size: 7x7
+            nn.BatchNorm2d(256),
+            
+            nn.Flatten(),
+            
+            nn.Dropout(p=dropout),
+            
+            nn.Linear(7 * 7 * 256, 500),
+            nn.LeakyReLU(negative_slope=0.2), # nn.ReLU(), # 
+            nn.BatchNorm1d(500),
+            nn.Dropout(p=dropout),
+            
+            nn.Linear(500, 256),
+            nn.LeakyReLU(negative_slope=0.2), # nn.ReLU(), # 
+            nn.BatchNorm1d(256),
+            nn.Dropout(p=dropout),
+            
+            nn.Linear(256, num_classes)
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

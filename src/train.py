@@ -7,7 +7,7 @@ from livelossplot.outputs import MatplotlibPlot
 from tqdm import tqdm
 from src.helpers import after_subplot
 
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, ReduceLROnPlateau
 
 import json
 
@@ -59,7 +59,7 @@ def train_one_epoch(train_dataloader, model, optimizer, loss):
 
         # update average training loss
         train_loss = train_loss + (
-            (1 / (batch_idx + 1)) * (loss_value.data.item() - train_loss)
+            (1 / (batch_idx + 1)) * (loss_value.item() - train_loss) #(1 / (batch_idx + 1)) * (loss_value.data.item() - train_loss)
         )
 
     return train_loss
@@ -123,7 +123,7 @@ def optimize(data_loaders, model, optimizer, loss, n_epochs, save_path, interact
     # plateau
     # HINT: look here: 
     # https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
-    scheduler  = StepLR(optimizer, step_size=5, gamma=.5) # YOUR CODE HERE (done)
+    scheduler  = ReduceLROnPlateau(optimizer, mode="min", threshold=0.01, patience=4) #StepLR(optimizer, step_size=5, gamma=.5) # YOUR CODE HERE (done)
 
     for epoch in range(1, n_epochs + 1):
 
@@ -154,7 +154,7 @@ def optimize(data_loaders, model, optimizer, loss, n_epochs, save_path, interact
 
         # Update learning rate, i.e., make a step in the learning rate scheduler
         # YOUR CODE HERE (done)
-        scheduler.step()
+        scheduler.step(valid_loss)# scheduler.step()
 
         # Log the losses and the current learning rate
         if interactive_tracking:

@@ -50,18 +50,23 @@ def get_data_loaders(
     data_transforms = {
         "train": transforms.Compose([
             transforms.Resize(256),
+            transforms.CenterCrop(224),
             # random affine transformations (rotation, translation, shear)
-            transforms.RandomAffine(scale=(0.9, 1.1), translate=(0.1, 0.1), degrees=10),
+            transforms.RandomAffine(scale=(1., 1.25), translate=(0, .1), degrees=(-15, 15), shear=(-10,10)),
             # Color modifications. Here I exaggerate to show the effect 
-            transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.3),
+            # transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.3),
+            transforms.ColorJitter(brightness = 0.05),
+            transforms.ColorJitter(contrast = 0.05), 
+            transforms.ColorJitter(saturation = 0.05),
+            transforms.ColorJitter(hue = 0.1),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.3),
             transforms.RandomGrayscale(p=.1),
             transforms.RandomPerspective(p=.5),
             transforms.RandomInvert(p=.2),
-            transforms.RandomCrop(224, padding_mode="reflect", pad_if_needed=True),
+            # transforms.RandomCrop(224, padding_mode="reflect", pad_if_needed=True),
             # transforms.RandomRotation(degrees=80),
-            #transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET),
+            # transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET),
             transforms.ToTensor(),
             transforms.Normalize(mean, std)
         ]),
@@ -122,14 +127,14 @@ def get_data_loaders(
         train_data,
         batch_size=batch_size,
         sampler=train_sampler,
-        num_workers=num_workers,
+        num_workers=num_workers
     )
     data_loaders["valid"] = torch.utils.data.DataLoader(
         # YOUR CODE HERE (done)
         valid_data,
         batch_size=batch_size,
         sampler=valid_sampler,
-        num_workers=num_workers,
+        num_workers=num_workers
     )
 
     # Now create the test data loader
@@ -151,7 +156,7 @@ def get_data_loaders(
         batch_size=batch_size,
         sampler=test_sampler, #valid_sampler,
         num_workers=num_workers,
-        shuffle=False
+        # shuffle=False
     )
 
     return data_loaders
